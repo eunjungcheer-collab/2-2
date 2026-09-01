@@ -475,6 +475,26 @@ function showConfirm(msg){
     document.getElementById('modalCancelBtn').onclick=()=>{ov.classList.add('hidden');resolve(false);};
   });
 }
+/* 옵션이 3개 이상인 선택창(예: 그만풀기 눌렀을 때 저장/채점/계속풀기 중 고르기).
+   options: [{key:'save', label:'...', primary:true}, ...] 순서대로 세로로 쌓아서 보여준다. */
+function showChoice(msg, options){
+  return new Promise(resolve=>{
+    const ov=document.getElementById('modalOverlay');
+    document.getElementById('modalMsg').textContent=msg;
+    document.getElementById('modalBtns').innerHTML=options.map((o,i)=>
+      `<button class="btn ${o.primary?'btn-primary':'btn-outline'}" style="margin-top:${i===0?'0':'8px'};" id="modalChoice${i}">${o.label}</button>`
+    ).join('');
+    document.getElementById('modalBtns').style.flexDirection='column';
+    ov.classList.remove('hidden');
+    options.forEach((o,i)=>{
+      document.getElementById('modalChoice'+i).onclick=()=>{
+        ov.classList.add('hidden');
+        document.getElementById('modalBtns').style.flexDirection='';
+        resolve(o.key);
+      };
+    });
+  });
+}
 function showLoading(msg){
   const ov=document.getElementById('modalOverlay');
   document.getElementById('modalMsg').innerHTML=`<span class="spinner"></span><br>${msg}`;
@@ -505,7 +525,7 @@ function renderLogin(){
   const loginEnabled = !loginConfigCache || loginConfigCache.loginEnabled!==false;
   return `
   <div class="hero">
-    <div class="eyebrow">중2 과학 8단원</div>
+    <div class="eyebrow">중2 과학 2단원</div>
     <h1>지권의 변화</h1>
     <p>지구계부터 판구조론까지, ${QUESTIONS.length}제로 완전정복!</p>
   </div>
@@ -518,7 +538,7 @@ function renderLogin(){
     <div class="small-note" style="margin-top:-6px;margin-bottom:8px;">선생님이 알려주신 비밀번호를 입력해 주세요.</div>`:''}
     <button class="btn btn-primary" id="loginBtn">입장하기</button>
   </div>
-  <div class="footer-copy">© 별과 우주 탐험대 · 중2 과학 8단원 ${QUESTIONS.length}제 · build 2026-08</div>
+  <div class="footer-copy">© 지권의 변화 · 중2 과학 2단원 ${QUESTIONS.length}제 · build 2026-08</div>
   `;
 }
 async function attemptLogin(){
@@ -565,7 +585,7 @@ function renderSetup(){
   }
   return `
   <div class="hero">
-    <div class="eyebrow">중2 과학 8단원</div>
+    <div class="eyebrow">중2 과학 2단원</div>
     <h1>지권의 변화</h1>
     <p>지구계부터 판구조론까지, ${QUESTIONS.length}제로 완전정복!</p>
   </div>
@@ -619,7 +639,7 @@ function renderSetup(){
     <div class="giveup" id="logoutBtn" style="margin-top:6px;">🚪 다른 사람으로 로그인</div>
     <div class="giveup" id="storageTestBtn" style="margin-top:6px;">🔧 저장 기능 테스트</div>
   </div>
-  <div class="footer-copy">© 별과 우주 탐험대 · 중2 과학 8단원 ${QUESTIONS.length}제 · build 2026-08</div>
+  <div class="footer-copy">© 지권의 변화 · 중2 과학 2단원 ${QUESTIONS.length}제 · build 2026-08</div>
   `;
 }
 
@@ -781,7 +801,7 @@ function renderQuiz(){
     ${state.submitted?
       `<button class="btn btn-primary" id="nextBtn">${state.idx===total-1?'결과 보기':'다음 문제'}</button>`
       :`<button class="btn btn-primary" id="submitBtn">답안 제출</button>`}
-    <div class="giveup" id="giveupBtn">🚪 그만 풀고 지금까지 점수 낼래요</div>
+    <div class="giveup" id="giveupBtn">🚪 그만 풀래요</div>
   </div>`;
 }
 
@@ -869,7 +889,7 @@ function renderSetResult(){
     <h2 class="card-title">🎯 세트 완료!</h2>
     <p>지금까지 ${doneInSet}문제 중 ${state.correct}문제를 맞혔어요.</p>
     <button class="btn btn-primary" id="nextSetBtn">다음 세트 시작</button>
-    <div class="giveup" id="giveupSetBtn" style="margin-top:12px;">🚪 그만 풀고 지금까지 점수 낼래요</div>
+    <div class="giveup" id="giveupSetBtn" style="margin-top:12px;">🚪 그만 풀래요</div>
   </div>`;
 }
 
@@ -883,6 +903,28 @@ function giveUp(){
   if(isFinalizing) return; isFinalizing=true;
   clearInterval(state.timerId);clearInterval(state.lockTimerId);
   finalizeAndShowResult(true); isFinalizing=false;
+}
+/* '그만 풀래요'를 눌렀을 때 점수를 내지 않고 저장만 해두고 메인 화면으로 나가는 경로.
+   saveResumeSnapshot()이 이미 매 문제 제출마다 로컬+서버(구글시트)에 저장해 두므로, 한 번 더
+   저장을 확실히 한 뒤 화면만 나간다. 나중에 이 이름으로 다시 들어오면(다른 기기 포함) 이어풀기로
+   뜬다. */
+function saveForLaterAndExit(){
+  saveResumeSnapshot();
+  clearInterval(state.timerId);clearInterval(state.lockTimerId);
+  screen='setup'; render();
+}
+/* 그만 풀래요 버튼을 누르면 세 가지 중 하나를 고르게 한다:
+   1) 저장하고 나중에 이어풀기, 2) 지금까지 푼 것만 채점하기, 3) 계속 풀래요(취소). */
+async function handleGiveUpTap(){
+  if(isFinalizing) return;
+  const choice=await showChoice('정말 그만 풀까요?',[
+    {key:'save', label:'💾 저장하고 나중에 이어풀기', primary:false},
+    {key:'grade', label:'📊 지금까지 푼 것만 채점하기', primary:true},
+    {key:'continue', label:'▶️ 계속 풀래요', primary:false}
+  ]);
+  if(choice==='save') saveForLaterAndExit();
+  else if(choice==='grade') giveUp();
+  // choice==='continue' 또는 그 외: 아무것도 하지 않고 계속 풀던 화면 그대로 둔다.
 }
 function finalizeAndShowResult(gaveUp){
   state.giveUp=gaveUp;
@@ -1292,19 +1334,11 @@ function bindEvents(){
     } else {
       document.getElementById('nextBtn').onclick=()=>goNext();
     }
-    document.getElementById('giveupBtn').onclick=async()=>{
-      if(isFinalizing) return;
-      const ok=await showConfirm('정말 그만 풀고 지금까지 점수를 낼까요?');
-      if(ok) giveUp();
-    };
+    document.getElementById('giveupBtn').onclick=()=>handleGiveUpTap();
   }
   else if(screen==='setresult'){
     document.getElementById('nextSetBtn').onclick=()=>{render();startTimerForCurrent();};
-    document.getElementById('giveupSetBtn').onclick=async()=>{
-      if(isFinalizing) return;
-      const ok=await showConfirm('정말 그만 풀고 지금까지 점수를 낼까요?');
-      if(ok) giveUp();
-    };
+    document.getElementById('giveupSetBtn').onclick=()=>handleGiveUpTap();
   }
   else if(screen==='result'){
     document.getElementById('wrongNoteBtn').onclick=()=>{screen='wrongnote';render();};
