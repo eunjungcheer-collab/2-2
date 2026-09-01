@@ -282,7 +282,7 @@ const APP_KEY='geochange100';      // 이 앱 전용 로컬 저장 키
 const APP_ID='geochange100';       // 구글 시트에 기록될 앱 구분자
 const TEACHER_PW='0000';
 const DEFAULT_STUDENT_PW='1234'; // 학생 로그인 기본 비밀번호(강사가 강사용 화면에서 바꿀 수 있어요)
-const GAS_URL='https://script.google.com/macros/s/AKfycbzDNOtbXxaDebYtDvGPvQibhcJcy6KOP0h0gbulmEalmNC6c28lZ5VC0_gGD8DGCxVxVg/exec';  // 이미 배포된 공용 Apps Script 백엔드 (여러 단원 앱이 공유, APP_ID로 구분됨)
+const GAS_URL='https://script.google.com/macros/s/AKfycbwSAZENNZJ4Y0Vy_wiRRFwv8V13tstEsr5uiTa_VO1KBDXre1D2aBentjviBecP9fsRxQ/exec';  // 이미 배포된 공용 Apps Script 백엔드 (여러 단원 앱이 공유, APP_ID로 구분됨)
 
 function uid(){return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function safeName(n){return (n||'').replace(/[^a-zA-Z0-9가-힣]/g,'');}
