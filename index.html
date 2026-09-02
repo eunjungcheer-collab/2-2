@@ -64,6 +64,15 @@ input[type=text]:focus{outline:2px solid var(--p1);}
 .qtext{font-size:19px;font-weight:700;line-height:1.5;margin:8px 0 14px;}
 .qimg{width:100%;border-radius:14px;margin-bottom:14px;border:1px solid var(--line);display:block;}
 .choice{border:1.6px solid #ddd6f5;border-radius:16px;padding:16px;margin-bottom:10px;font-size:15px;cursor:pointer;background:#faf9ff;}
+.block-slots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.block-slot{width:44px;height:52px;border:2px solid #ddd6f5;border-radius:10px;background:#faf9ff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--p1-dark);}
+.block-slot.filled{border-color:var(--p1);background:#efeaff;}
+.block-slot.correct{border-color:#4caf50;background:#e8f7ea;color:#2e7d32;}
+.block-slot.wrong{border-color:#e57373;background:#fdecea;color:#c62828;}
+.block-tiles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
+.block-tile{width:42px;height:42px;border-radius:10px;background:#fff;border:1.6px solid #ddd6f5;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;cursor:pointer;}
+.block-tile.used{opacity:0.25;pointer-events:none;}
+.block-tile.locked{opacity:0.5;pointer-events:none;}
 .choice.sel{border-color:var(--p2);background:#fff3de;}
 .choice.correct{border-color:var(--good);background:#e7f6ec;}
 .choice.wrong{border-color:#c0392b;background:#fdeceb;}
@@ -158,6 +167,7 @@ drift_evidence:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFB
 
 /* ============ QUESTION BANK ============ */
 const CATS = [
+
 {id:"geosys",name:"지구계",icon:"🌍"},
 {id:"interior",name:"지구 내부 조사",icon:"🔬"},
 {id:"layers",name:"지권의 층상 구조",icon:"🌐"},
@@ -173,8 +183,12 @@ const CATS = [
 ];
 
 function M(c,q,o,a,e,img){return {c,t:'mcq',q,o,a,e,img:img||null};}
+/* 블록 터치형 문제(철자/기호를 순서대로 눌러서 완성하는 방식).
+   answer: 정답 문자열(예: 'He'), blocks: 화면에 흩어놓을 글자 타일 배열(정답 글자 + 헷갈리는 글자 섞어서). */
+function B(c,q,answer,blocks,e){return {c,t:'blocks',q,answer,blocks,e};}
 
 const QUESTIONS = [
+
 M("geosys","지구를 이루는 여러 요소가 서로 영향을 주고받으며 이루는 하나의 계를 무엇이라고 하는가?",["지구계","생태계","태양계","소화계"],0,"지구계는 지권, 수권, 기권, 생물권, 외권으로 구성되며, 각 요소가 서로 영향을 주고받는 하나의 계이다."),
 M("geosys","다음 중 지구계의 구성 요소가 아닌 것은?",["지권","수권","기권","태양계"],3,"지구계는 지권, 수권, 기권, 생물권, 외권 5가지로 구성된다. 태양계는 지구계의 구성 요소가 아니라 외권에 포함되는 천체들이 속한 더 큰 범위이다."),
 M("geosys","수권에 대한 설명으로 옳은 것은?",["고체 상태의 빙하는 수권에 포함되지 않는다","바다가 수권의 대부분을 차지한다","생명체에게 서식처를 제공하지 않는다","기권보다 부피가 크다"],1,"수권은 바다, 빙하, 지하수, 강, 호수 등 지구에 있는 물로 이루어지며, 이 중 바다가 대부분을 차지한다. 고체 상태의 빙하도 수권에 포함된다."),
@@ -324,7 +338,7 @@ async function getStudentPassword(){ const c=await getLoginConfig(); return c.pa
 function newSession(){
   return {name:localStorage.getItem('lastname_'+APP_KEY)||'',cats:[],order:'seq',mode:'full',wrongScope:'all',randomCount:0,
     list:[],idx:0,correct:0,answers:{},wrong:[],combo:0,maxCombo:0,
-    setSize:20,setIdx:0,selected:null,submitted:false,giveUp:false,
+    setSize:20,setIdx:0,selected:null,blockPicks:[],submitted:false,giveUp:false,
     lockUntil:0,lockTimerId:null,gsSessionId:null,timeLeft:60,timerId:null};
 }
 let state=newSession();
@@ -399,7 +413,7 @@ function resumeFromSnapshot(snap){
   state.answers=snap.answers||{}; state.wrong=snap.wrong||[]; state.setIdx=snap.setIdx||0;
   state.combo=snap.combo||0; state.maxCombo=snap.maxCombo||0;
   state.gsSessionId=snap.gsSessionId||uid();
-  state.selected=null; state.submitted=false;
+  state.selected=null; state.blockPicks=[]; state.submitted=false;
   screen='quiz'; render(); startTimerForCurrent();
 }
 
@@ -525,7 +539,7 @@ function renderLogin(){
   const loginEnabled = !loginConfigCache || loginConfigCache.loginEnabled!==false;
   return `
   <div class="hero">
-    <div class="eyebrow">중2 과학 2단원</div>
+    <div class="eyebrow">중2과학 2단원 지권의 변화</div>
     <h1>지권의 변화</h1>
     <p>지구계부터 판구조론까지, ${QUESTIONS.length}제로 완전정복!</p>
   </div>
@@ -538,7 +552,7 @@ function renderLogin(){
     <div class="small-note" style="margin-top:-6px;margin-bottom:8px;">선생님이 알려주신 비밀번호를 입력해 주세요.</div>`:''}
     <button class="btn btn-primary" id="loginBtn">입장하기</button>
   </div>
-  <div class="footer-copy">© 지권의 변화 · 중2 과학 2단원 ${QUESTIONS.length}제 · build 2026-08</div>
+  <div class="footer-copy">© 지권의 변화 · 중2과학 2단원 지권의 변화 ${QUESTIONS.length}제 · build 2026-08</div>
   `;
 }
 async function attemptLogin(){
@@ -585,7 +599,7 @@ function renderSetup(){
   }
   return `
   <div class="hero">
-    <div class="eyebrow">중2 과학 2단원</div>
+    <div class="eyebrow">중2과학 2단원 지권의 변화</div>
     <h1>지권의 변화</h1>
     <p>지구계부터 판구조론까지, ${QUESTIONS.length}제로 완전정복!</p>
   </div>
@@ -639,7 +653,7 @@ function renderSetup(){
     <div class="giveup" id="logoutBtn" style="margin-top:6px;">🚪 다른 사람으로 로그인</div>
     <div class="giveup" id="storageTestBtn" style="margin-top:6px;">🔧 저장 기능 테스트</div>
   </div>
-  <div class="footer-copy">© 지권의 변화 · 중2 과학 2단원 ${QUESTIONS.length}제 · build 2026-08</div>
+  <div class="footer-copy">© 지권의 변화 · 중2과학 2단원 지권의 변화 ${QUESTIONS.length}제 · build 2026-08</div>
   `;
 }
 
@@ -752,7 +766,7 @@ function beginList(list){
   clearResumeSnapshot(state.name);
   state.list=list;
   state.idx=0;state.correct=0;state.wrong=[];state.answers={};
-  state.setIdx=0;state.selected=null;state.submitted=false;state.giveUp=false;
+  state.setIdx=0;state.selected=null;state.blockPicks=[];state.submitted=false;state.giveUp=false;
   state.gsSessionId=uid();
   screen='quiz';
   render();
@@ -762,6 +776,37 @@ function beginList(list){
 /* ============ QUIZ SCREEN ============ */
 function currentQ(){return state.list[state.idx];}
 
+/* 블록 터치형 문제 화면: 정답 글자 수만큼 빈 칸을 보여주고, 아래 흩어진 글자 타일을 순서대로
+   눌러서 채우게 한다. state.blockPicks는 q.blocks 배열 안에서 이미 누른 타일의 인덱스를
+   누른 순서대로 담은 배열이다. */
+function renderBlocksUI(q,isLocked){
+  const typed=state.blockPicks.map(i=>q.blocks[i]);
+  const answerChars=q.answer.split('');
+  const slotsHtml=answerChars.map((ch,i)=>{
+    let cls='block-slot';
+    const picked=typed[i];
+    if(state.submitted){
+      if(picked===ch) cls+=' correct';
+      else cls+=' wrong';
+    } else if(picked!==undefined){
+      cls+=' filled';
+    }
+    return `<div class="${cls}">${picked!==undefined?picked:(state.submitted?ch:'')}</div>`;
+  }).join('');
+  const tilesHtml=q.blocks.map((letter,i)=>{
+    const used=state.blockPicks.includes(i);
+    let cls='block-tile';
+    if(used) cls+=' used';
+    if(isLocked) cls+=' locked';
+    return `<div class="${cls}" data-bidx="${i}">${letter}</div>`;
+  }).join('');
+  return `
+    <div class="block-slots">${slotsHtml}</div>
+    <div class="block-tiles">${tilesHtml}</div>
+    ${!state.submitted?`<div class="giveup" id="blockUndoBtn" style="margin-top:8px;">⌫ 한 글자 지우기</div>`:''}
+  `;
+}
+
 function renderQuiz(){
   const q=currentQ();
   if(!q) return renderResult();
@@ -769,7 +814,8 @@ function renderQuiz(){
   const timePct=Math.max(0,state.timeLeft/60*100);
   const submittedInfo=state.submitted?state.lastResult:null;
   const isLocked=state.mode==='deep' && !state.submitted && Date.now()<state.lockUntil;
-  const choicesHtml=q.o.map((opt,i)=>{
+  const isBlocks=q.t==='blocks';
+  const choicesHtml=isBlocks ? renderBlocksUI(q,isLocked) : q.o.map((opt,i)=>{
     let cls='choice';
     if(state.submitted){
       if(i===q.a) cls+=' correct';
@@ -852,8 +898,19 @@ function handleSubmit(timeout){
   clearInterval(state.timerId);
   const q=currentQ();
   let ok=false;
-  if(timeout && state.selected==null){ ok=false; }
-  else { ok=state.selected===q.a; }
+  let yourAnswerText='(제출 안함)';
+  let correctAnswerText;
+  if(q.t==='blocks'){
+    const typed=state.blockPicks.map(i=>q.blocks[i]).join('');
+    ok = !timeout && typed===q.answer;
+    yourAnswerText = typed || '(제출 안함)';
+    correctAnswerText = q.answer;
+  } else {
+    if(timeout && state.selected==null){ ok=false; }
+    else { ok=state.selected===q.a; }
+    yourAnswerText = state.selected!=null?q.o[state.selected]:'(제출 안함)';
+    correctAnswerText = q.o[q.a];
+  }
   state.submitted=true;
   state.lastResult={ok};
   state.answers[q._id]=ok;
@@ -865,7 +922,7 @@ function handleSubmit(timeout){
   else {
     state.combo=0;
     state.wrong=state.wrong.filter(w=>w.id!==q._id);
-    state.wrong.push({id:q._id,q:q.q,your:state.selected!=null?q.o[state.selected]:'(제출 안함)',correct:q.o[q.a],explain:q.e,cat:q.c});
+    state.wrong.push({id:q._id,q:q.q,your:yourAnswerText,correct:correctAnswerText,explain:q.e,cat:q.c});
   }
   render();
   saveResumeSnapshot();
@@ -873,7 +930,7 @@ function handleSubmit(timeout){
 
 function goNext(){
   state.idx++;
-  state.selected=null;state.submitted=false;
+  state.selected=null;state.blockPicks=[];state.submitted=false;
   if(state.idx>=state.list.length){ finishQuiz(); return; }
   if(state.mode==='focus' && state.idx>0 && state.idx%state.setSize===0){
     screen='setresult';render();return;
@@ -1322,11 +1379,25 @@ function bindEvents(){
           state.selected=parseInt(c.dataset.idx);render();
         };
       });
+      const curQ=currentQ();
+      document.querySelectorAll('.block-tile').forEach(t=>{
+        t.onclick=()=>{
+          if(state.mode==='deep' && Date.now()<state.lockUntil){return;}
+          const idx=parseInt(t.dataset.bidx);
+          if(state.blockPicks.includes(idx)) return; // 이미 쓴 타일
+          if(curQ && state.blockPicks.length>=curQ.answer.length) return; // 다 채웠으면 더 못 누름
+          state.blockPicks.push(idx); render();
+        };
+      });
+      const undoBtn=document.getElementById('blockUndoBtn');
+      if(undoBtn) undoBtn.onclick=()=>{ state.blockPicks.pop(); render(); };
       const sb=document.getElementById('submitBtn');
       if(sb) sb.onclick=async()=>{
         if(state.mode==='deep' && Date.now()<state.lockUntil){showAlert('아직 5초가 지나지 않았어요!');return;}
-        if(state.selected===null || state.selected===undefined){
-          const ok=await showConfirm('답을 선택하지 않았어요. 그래도 제출할까요?');
+        const isBlocks=curQ && curQ.t==='blocks';
+        const incomplete=isBlocks ? state.blockPicks.length<curQ.answer.length : (state.selected===null || state.selected===undefined);
+        if(incomplete){
+          const ok=await showConfirm(isBlocks?'아직 다 채우지 않았어요. 그래도 제출할까요?':'답을 선택하지 않았어요. 그래도 제출할까요?');
           if(!ok){return;}
         }
         handleSubmit(false);
