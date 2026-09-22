@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>지권의 변화 100제</title>
+<title>지권의 변화 130제</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -180,12 +180,14 @@ const CATS = [
 {id:"cycle",name:"암석의 순환",icon:"🔄"},
 {id:"weathering",name:"풍화와 토양",icon:"🌦️"},
 {id:"plate",name:"대륙 이동설과 판구조론",icon:"🗺️"},
+{id:'oxreason', name:'OX 함정문장 찾기', icon:'🎯'},
 ];
 
 function M(c,q,o,a,e,img){return {c,t:'mcq',q,o,a,e,img:img||null};}
 /* 블록 터치형 문제(철자/기호를 순서대로 눌러서 완성하는 방식).
    answer: 정답 문자열(예: 'He'), blocks: 화면에 흩어놓을 글자 타일 배열(정답 글자 + 헷갈리는 글자 섞어서). */
 function B(c,q,answer,blocks,e){return {c,t:'blocks',q,answer,blocks,e};}
+function OX(c,q,isTrue,reasons,ra,e){return {c,t:'ox2',q,isTrue,reasons:reasons||[],ra:(ra===undefined?null:ra),e};}
 
 const QUESTIONS = [
 M("geosys","지구를 이루는 여러 요소가 서로 영향을 주고받으며 이루는 하나의 계를 무엇이라고 하는가?",["지구계","소화계","태양계","생태계"],0,"지구계는 지권, 수권, 기권, 생물권, 외권으로 구성되며, 각 요소가 서로 영향을 주고받는 하나의 계이다."),
@@ -287,7 +289,90 @@ M("plate","대륙 이동설이 발표 당시 인정받지 못한 까닭으로 �
 M("plate","그림은 여러 판의 분포를 나타낸 것이다. 판에 대한 설명으로 옳지 않은 것은?",["판은 지각과 맨틀의 윗부분을 포함하는 단단한 암석층이다","모든 판은 이동 방향과 속도가 같다","판의 경계에서는 화산 활동이나 지진이 활발하게 일어난다","판의 이동에 따라 대륙도 함께 이동한다"],1,"판마다 이동 방향과 속도가 서로 다르다.","plate_map"),
 M("plate","대륙판과 해양판을 비교한 것으로 옳은 것은?",["대륙판에는 해양 지각이 포함된다","해양판이 대륙판보다 두껍다","두 판의 두께는 같다","대륙판이 해양판보다 두껍다"],3,"대륙판의 두께는 약 100km, 해양판의 두께는 약 70km로 대륙판이 더 두껍다."),
 M("plate","지구에서 일어나는 화산 활동의 70% 이상, 지진의 90% 이상이 발생하여 '불의 고리'라고 불리는 지역은?",["남극 대륙","알프스·히말라야 화산대와 지진대","환태평양 화산대와 지진대","대서양 중앙 해령"],2,"환태평양 화산대와 지진대는 태평양 가장자리를 따라 분포하며, 지구 화산 활동의 70% 이상, 지진의 90% 이상이 일어나 '불의 고리'라고 불린다."),
-M("plate","그림은 우리나라 주변 판의 경계를 나타낸 것이다. 우리나라보다 일본에서 화산 활동과 지진이 활발한 까닭으로 옳은 것은?",["우리나라는 판의 경계에 있기 때문이다","일본이 판의 경계에 더 가깝기 때문이다","일본이 유라시아판 내부에 있기 때문이다","일본은 판의 이동이 없기 때문이다"],1,"우리나라는 유라시아판 안쪽에 있지만, 일본은 유라시아판·태평양판·필리핀판이 만나는 판의 경계에 있어 화산 활동과 지진이 매우 활발하다.","korea_plate_map")
+M("plate","그림은 우리나라 주변 판의 경계를 나타낸 것이다. 우리나라보다 일본에서 화산 활동과 지진이 활발한 까닭으로 옳은 것은?",["우리나라는 판의 경계에 있기 때문이다","일본이 판의 경계에 더 가깝기 때문이다","일본이 유라시아판 내부에 있기 때문이다","일본은 판의 이동이 없기 때문이다"],1,"우리나라는 유라시아판 안쪽에 있지만, 일본은 유라시아판·태평양판·필리핀판이 만나는 판의 경계에 있어 화산 활동과 지진이 매우 활발하다.","korea_plate_map"),
+OX("oxreason","외권은 지구 내부의 지각과 맨틀을 포함하는 영역으로, 지권에 속한다.",false,
+  ["지각과 맨틀을 포함하는 것은 외권이 아니라 지권이기 때문","외권은 생물이 살고 있는 영역이므로 생물권에 속하기 때문","지각과 맨틀은 수권에 속하는 암석이기 때문"],
+  0,"외권은 기권 바깥 영역인 우주 공간으로 태양, 달 같은 천체를 포함하고, 지각과 맨틀을 포함하는 것은 지권이에요."),
+OX("oxreason","화산재가 분출되어 햇빛을 가리고 기온이 낮아지는 현상은 지권과 수권의 상호작용에 해당한다.",false,
+  ["화산재는 수권이 아니라 생물권에서 만들어지는 물질이기 때문","기온이 낮아지는 것은 기권에서 일어나는 변화이므로 지권과 기권의 상호작용이기 때문","화산 활동은 지권이 아니라 외권에서 일어나는 현상이기 때문"],
+  1,"화산 활동은 지권에서 일어나지만 화산재가 기온을 낮추는 것은 기권에 영향을 준 것이므로 지권과 기권의 상호작용이에요."),
+OX("oxreason","지구 내부를 조사하는 방법 중 시추는 간접적인 방법에 해당하며, 지구 내부 전체 구조를 정확히 알아낼 수 있다.",false,
+  ["시추는 지진파보다 훨씬 더 깊은 곳까지 뚫을 수 있기 때문","시추는 화산 분출물을 이용하는 조사법이기 때문","시추는 간접적인 방법이 아니라 직접적인 방법이기 때문"],
+  2,"지구 내부 조사 방법 중 시추는 직접적인 방법이지만, 땅속 깊숙이까지 뚫을 수 없어 지구 내부 전체를 알아내는 데는 한계가 있어요."),
+OX("oxreason","지구 내부는 지각, 맨틀, 외핵, 내핵으로 구분되며, 이 중 외핵은 고체 상태이고 내핵은 액체 상태이다.",false,
+  ["외핵은 액체 상태이고 내핵이 고체 상태이기 때문","외핵과 내핵은 모두 기체 상태이기 때문","외핵과 내핵의 상태는 아직 밝혀지지 않았기 때문"],
+  0,"지구 내부는 지각-맨틀-외핵-내핵으로 이루어지며, 외핵은 액체 상태, 내핵은 고체 상태예요."),
+OX("oxreason","대륙지각은 해양지각보다 두께가 얇다.",false,
+  ["대륙지각과 해양지각은 두께가 항상 같기 때문","대륙지각은 해양지각보다 두껍기 때문","해양지각은 대륙지각보다 밀도가 작아 두께를 비교할 수 없기 때문"],
+  1,"지각은 두꺼운 대륙지각과 얇은 해양지각으로 이루어져 있어요."),
+OX("oxreason","조암 광물 중 가장 많은 양을 차지하는 광물은 석영이다.",false,
+  ["석영은 조암 광물이 아니라 퇴적물이기 때문","조암 광물의 양은 암석마다 항상 같기 때문에 비교할 수 없기 때문","조암 광물 중 가장 많은 양을 차지하는 광물은 석영이 아니라 장석이기 때문"],
+  2,"조암 광물 중 가장 많은 양을 차지하는 광물은 장석이에요."),
+OX("oxreason","휘석, 각섬석, 감람석, 흑운모는 밝은 색을 띠는 조암 광물이다.",false,
+  ["휘석, 각섬석, 감람석, 흑운모는 밝은 색이 아니라 어두운 색을 띠는 광물이기 때문","이 광물들은 모두 염산과 반응하여 색이 밝아지기 때문","이 광물들은 조암 광물이 아니라 화석이기 때문"],
+  0,"석영과 장석은 밝은 색 광물이고, 휘석·각섬석·감람석·흑운모는 어두운 색 광물이에요."),
+OX("oxreason","방해석과 석영을 서로 긁으면 석영이 긁히고 방해석은 긁히지 않는다.",false,
+  ["석영은 굳기가 없는 광물이기 때문","방해석이 석영보다 무른 광물이라 방해석이 긁히기 때문","두 광물은 굳기가 같아서 서로 긁히지 않기 때문"],
+  1,"방해석과 석영을 서로 긁으면 더 무른 광물인 방해석이 긁혀요."),
+OX("oxreason","석영은 묽은 염산과 반응하여 기포를 발생시키지만 방해석은 반응하지 않는다.",false,
+  ["석영과 방해석은 둘 다 염산과 반응하지 않기 때문","기포를 내는 반응은 굳기 실험이지 염산 반응이 아니기 때문","묽은 염산과 반응해 기포를 내는 광물은 석영이 아니라 방해석이기 때문"],
+  2,"방해석은 묽은 염산과 반응해 기포(이산화 탄소)를 내지만, 석영은 반응하지 않아요."),
+OX("oxreason","화장품의 원료로 이용되는 광물은 방해석이다.",false,
+  ["화장품의 원료로 이용되는 광물은 방해석이 아니라 활석이기 때문","방해석은 유리를 만드는 데에만 활용되기 때문","화장품에는 광물이 전혀 사용되지 않기 때문"],
+  0,"화장품의 원료가 되는 광물은 활석이에요."),
+OX("oxreason","장석은 화장품의 원료로 활용되고, 활석은 도자기의 원료로 활용된다.",false,
+  ["장석과 활석은 활용 분야가 정해져 있지 않기 때문","도자기의 원료로 활용되는 것은 장석이고, 화장품의 원료로 활용되는 것은 활석이기 때문","화장품과 도자기에는 광물이 전혀 사용되지 않기 때문"],
+  1,"장석은 도자기의 원료로, 활석은 화장품의 원료로 활용돼요."),
+OX("oxreason","현무암은 결정의 크기가 크고 밝은 색을 띠는 심성암이다.",false,
+  ["현무암은 결정이 커서 화강암과 똑같은 암석이기 때문","현무암은 퇴적물이 굳어져 만들어진 퇴적암이기 때문","현무암은 심성암이 아니라 결정이 작고 어두운색을 띠는 화산암이기 때문"],
+  2,"현무암은 결정의 크기가 작고 어두운색을 띠는 화산암이에요."),
+OX("oxreason","화강암은 마그마가 지표 부근에서 빠르게 냉각되어 만들어진 화산암이다.",false,
+  ["화강암은 지하 깊은 곳에서 마그마가 천천히 식어 만들어지는 심성암이기 때문","화강암은 화산 폭발 시 분출된 용암이 굳은 것이기 때문","화강암은 결정 크기가 매우 작은 것이 특징이기 때문"],
+  0,"화강암은 땅속 깊은 곳에서 마그마가 천천히 식어 만들어지는 심성암이에요."),
+OX("oxreason","유문암은 결정의 크기가 크고 어두운 색을 띠는 심성암이다.",false,
+  ["유문암은 반려암과 같은 어두운색 심성암이기 때문","유문암은 결정의 크기가 작고 밝은 색을 띠는 화산암이기 때문","유문암은 퇴적암의 한 종류이기 때문"],
+  1,"유문암은 결정의 크기가 작고 밝은 색을 띠는 화산암이에요."),
+OX("oxreason","화산재가 쌓여 굳어지면 만들어지는 퇴적암은 이암이다.",false,
+  ["이암은 자갈이 쌓여 만들어지는 퇴적암이기 때문","화산재는 퇴적암이 아니라 화성암을 만드는 재료이기 때문","화산재가 쌓여 굳어지면 이암이 아니라 응회암이 되기 때문"],
+  2,"진흙이 쌓이면 이암, 화산재가 쌓이면 응회암, 모래가 쌓이면 사암, 자갈이 쌓이면 역암이 돼요."),
+OX("oxreason","사암이 변성 작용을 받으면 대리암이 되고, 석회암이 변성 작용을 받으면 규암이 된다.",false,
+  ["사암은 규암이 되고 석회암은 대리암이 되는 것이 옳은 짝이기 때문","사암과 석회암은 변성 작용을 받아도 변하지 않기 때문","대리암과 규암은 모두 화성암의 한 종류이기 때문"],
+  0,"이암이 변성 작용을 받으면 편암·편마암이 되고, 사암은 규암, 석회암은 대리암이 돼요."),
+OX("oxreason","변성암의 엽리는 압력과 나란한 방향으로 줄무늬가 생기는 구조이다.",false,
+  ["엽리는 퇴적암에서만 관찰되는 구조이기 때문","엽리의 줄무늬는 압력과 나란한 방향이 아니라 수직인 방향으로 생기기 때문","엽리는 광물의 굳기 차이 때문에 생기는 구조이기 때문"],
+  1,"엽리는 압력의 수직 방향으로 광물이 배열되며 생기는 줄무늬예요."),
+OX("oxreason","화성암, 퇴적암, 변성암은 한 번 만들어지면 서로 다른 종류의 암석으로 다시 변할 수 없다.",false,
+  ["화성암은 한 번 만들어지면 절대 녹지 않는 성질을 가지기 때문","퇴적암과 변성암은 서로 같은 암석이므로 변화가 필요 없기 때문","암석은 풍화, 열과 압력, 용융 등의 작용을 받아 다른 종류의 암석이나 마그마로 변할 수 있기 때문"],
+  2,"암석은 풍화, 열과 압력, 녹는 과정(용융) 등을 거치며 화성암·퇴적암·변성암 사이를 순환해요."),
+OX("oxreason","이산화 탄소는 암석의 색을 붉게 변화시키고 표면을 약하게 만드는 화학적 풍화 작용을 일으킨다.",false,
+  ["암석의 색을 붉게 변화시키는 것은 이산화 탄소가 아니라 산소의 작용이기 때문","이산화 탄소는 풍화 작용에 전혀 관여하지 않기 때문","암석의 색 변화는 물리적 풍화에 의해서만 일어나기 때문"],
+  0,"산소는 암석의 성분을 변화시켜 색을 붉게 만들고 표면을 약하게 하며, 이산화 탄소는 석회암을 녹여 석회동굴을 만들어요."),
+OX("oxreason","토양의 생성 순서는 표토에서 시작해 심토, 모질물을 거쳐 기반암이 만들어지는 순서이다.",false,
+  ["표토와 기반암은 풍화 순서와 관계없이 동시에 만들어지기 때문","토양은 기반암이 풍화되어 모질물, 심토를 거쳐 표토가 만들어지는 순서로 생성되기 때문","심토는 가장 먼저 만들어지고 이후 기반암이 만들어지기 때문"],
+  1,"토양은 기반암(D) → 모질물(C) → 심토(B) → 표토(A) 순서로 생성돼요."),
+OX("oxreason","베게너가 제시한 대륙 이동설은 대륙이 이동하는 원동력을 명확히 설명하여 발표 당시 널리 인정받았다.",false,
+  ["대륙 이동설은 판 구조론보다 나중에 등장한 학설이기 때문","베게너는 화석 증거를 전혀 제시하지 않았기 때문","베게너는 대륙이 이동하는 원동력을 설명하지 못해 대륙 이동설이 당시에는 인정받지 못했기 때문"],
+  2,"베게너는 대륙 이동설을 뒷받침하는 증거를 제시했지만, 대륙이 이동하는 원동력을 설명하지 못해 당시에는 인정받지 못했어요."),
+OX("oxreason","해양판은 대륙판보다 두껍지만 평균 밀도는 더 작다.",false,
+  ["두껍지만 밀도가 작은 것은 해양판이 아니라 대륙판이기 때문","해양판과 대륙판은 두께와 밀도가 항상 같기 때문","판의 두께와 밀도는 화산 활동으로만 결정되기 때문"],
+  0,"대륙판은 해양판보다 두껍지만 평균 밀도는 작고, 해양판은 얇지만 밀도는 커요."),
+OX("oxreason","화산대와 지진대는 서로 관련이 없어 분포 지역이 크게 다르다.",false,
+  ["화산대는 대륙 중앙부에, 지진대는 해양 중앙부에 각각 따로 분포하기 때문","화산대와 지진대는 거의 일치하며 판의 경계와 관계가 깊기 때문","지진대와 화산대는 계절에 따라 위치가 달라지기 때문"],
+  1,"화산대와 지진대는 거의 일치하며, 판의 경계에서 주로 나타나요."),
+OX("oxreason","지구계는 지권, 수권, 기권, 생물권, 외권의 다섯 요소가 서로 영향을 주고받으며 이루어진 하나의 계이다.",true,[],null,
+  "지구계는 지권, 수권, 기권, 생물권, 외권 다섯 가지 요소로 이루어져 있고, 각 요소는 서로 영향을 주고받아요."),
+OX("oxreason","간접적인 방법 중 지진파를 이용한 분석은 지구 내부를 알아내는 가장 효과적인 방법이다.",true,[],null,
+  "지진파는 통과하는 물질에 따라 전달 속도가 달라져서 지구 내부 구조를 알아내는 가장 효과적인 방법이에요."),
+OX("oxreason","맨틀은 지구 전체 부피의 약 80%를 차지하며 지구 내부에서 가장 큰 부피를 가진 층이다.",true,[],null,
+  "맨틀은 지구 전체 부피의 약 80%를 차지하는 가장 큰 층이에요."),
+OX("oxreason","화산암은 마그마가 지표 부근에서 빠르게 식어 만들어지므로 알갱이의 크기가 작다.",true,[],null,
+  "화산암은 마그마가 지표 부근에서 빠르게 냉각되어 결정(알갱이)의 크기가 작아요."),
+OX("oxreason","자갈이 쌓여 굳어지면 역암이 되고, 모래가 쌓여 굳어지면 사암이 된다.",true,[],null,
+  "퇴적물의 크기에 따라 자갈은 역암, 모래는 사암, 진흙은 이암, 화산재는 응회암이 돼요."),
+OX("oxreason","물이 암석의 틈에서 얼면 부피가 늘어나면서 암석의 틈을 넓혀 암석을 부서지게 한다.",true,[],null,
+  "물이 암석 틈에서 얼면 부피가 커지면서 틈을 넓혀 암석을 부서지게 하는 물리적 풍화가 일어나요."),
+OX("oxreason","판의 경계에서는 지진과 화산 활동이 활발하게 일어난다.",true,[],null,
+  "판의 경계는 지진과 화산 활동이 활발히 일어나는 곳이에요."),
 ];
 
 /* ============ APP CONFIG ============ */
@@ -337,7 +422,7 @@ async function getStudentPassword(){ const c=await getLoginConfig(); return c.pa
 function newSession(){
   return {name:localStorage.getItem('lastname_'+APP_KEY)||'',cats:[],order:'seq',mode:'full',wrongScope:'all',randomCount:0,
     list:[],idx:0,correct:0,answers:{},wrong:[],combo:0,maxCombo:0,
-    setSize:20,setIdx:0,selected:null,blockPicks:[],submitted:false,giveUp:false,
+    setSize:20,setIdx:0,selected:null,blockPicks:[],submitted:false,giveUp:false,ox2Stage:1,
     lockUntil:0,lockTimerId:null,gsSessionId:null,timeLeft:60,timerId:null};
 }
 let state=newSession();
@@ -540,7 +625,7 @@ function renderLogin(){
   <div class="hero">
     <div class="eyebrow">중2과학 2단원 지권의 변화</div>
     <h1>지권의 변화</h1>
-    <p>지구계부터 판구조론까지, ${QUESTIONS.length}제로 완전정복!</p>
+    <p>지구계부터 OX 함정문장까지, ${QUESTIONS.length}제로 완전정복!</p>
   </div>
   <div class="card">
     <label class="field-label">🙋 이름(아이디)을 입력해줘</label>
@@ -600,7 +685,7 @@ function renderSetup(){
   <div class="hero">
     <div class="eyebrow">중2과학 2단원 지권의 변화</div>
     <h1>지권의 변화</h1>
-    <p>지구계부터 판구조론까지, ${QUESTIONS.length}제로 완전정복!</p>
+    <p>지구계부터 OX 함정문장까지, ${QUESTIONS.length}제로 완전정복!</p>
   </div>
   <div class="card">
     <label class="field-label">👋 ${state.name}님, 반가워요!</label>
@@ -765,7 +850,7 @@ function beginList(list){
   clearResumeSnapshot(state.name);
   state.list=list;
   state.idx=0;state.correct=0;state.wrong=[];state.answers={};
-  state.setIdx=0;state.selected=null;state.blockPicks=[];state.submitted=false;state.giveUp=false;
+  state.setIdx=0;state.selected=null;state.blockPicks=[];state.submitted=false;state.giveUp=false;state.ox2Stage=1;
   state.gsSessionId=uid();
   screen='quiz';
   render();
@@ -806,6 +891,37 @@ function renderBlocksUI(q,isLocked){
   `;
 }
 
+function renderOX2UI(q,isLocked){
+  if(state.ox2Stage===2){
+    return q.reasons.map((r,i)=>{
+      let cls='choice';
+      if(state.submitted){
+        if(i===q.ra) cls+=' correct';
+        else if(i===state.selected) cls+=' wrong';
+      } else if(isLocked){
+        cls+=' locked';
+      } else if(state.selected===i){
+        cls+=' sel';
+      }
+      return `<div class="${cls}" data-idx="${i}">${['①','②','③'][i]} ${r}</div>`;
+    }).join('');
+  }
+  const labels=['⭕ 맞는 문장이에요','❌ 틀린 문장이에요'];
+  const correctIdx=q.isTrue?0:1;
+  return labels.map((label,i)=>{
+    let cls='choice';
+    if(state.submitted){
+      if(i===correctIdx) cls+=' correct';
+      else if(i===state.selected) cls+=' wrong';
+    } else if(isLocked){
+      cls+=' locked';
+    } else if(state.selected===i){
+      cls+=' sel';
+    }
+    return `<div class="${cls}" data-idx="${i}">${label}</div>`;
+  }).join('');
+}
+
 function renderQuiz(){
   const q=currentQ();
   if(!q) return renderResult();
@@ -814,7 +930,8 @@ function renderQuiz(){
   const submittedInfo=state.submitted?state.lastResult:null;
   const isLocked=state.mode==='deep' && !state.submitted && Date.now()<state.lockUntil;
   const isBlocks=q.t==='blocks';
-  const choicesHtml=isBlocks ? renderBlocksUI(q,isLocked) : q.o.map((opt,i)=>{
+  const isOX2=q.t==='ox2';
+  const choicesHtml=isBlocks ? renderBlocksUI(q,isLocked) : isOX2 ? renderOX2UI(q,isLocked) : q.o.map((opt,i)=>{
     let cls='choice';
     if(state.submitted){
       if(i===q.a) cls+=' correct';
@@ -831,6 +948,7 @@ function renderQuiz(){
     const ok=submittedInfo.ok;
     feedback=`<div class="explain-box ${ok?'right':''}"><b>${ok?'정답이에요! 🎉':'아쉬워요! 다시 확인해볼까요?'}</b>${q.e}</div>`;
   }
+  const ox2StageTag=isOX2 ? (state.ox2Stage===2 ? '<div class="tag" style="background:#fdeceb;color:#c0392b;">2단계 · 이 문장이 틀린 진짜 이유는?</div>' : '<div class="tag">1단계 · 이 문장, 맞을까요 틀릴까요?</div>') : '';
   return `
   <div class="card">
     <div class="tag">${catName(q.c)}</div>
@@ -841,6 +959,7 @@ function renderQuiz(){
     ${(state.combo||0)>=2?`<div class="combo-badge">🔥 ${state.combo}연속 정답!</div>`:''}
     <div class="qtext">Q${state.idx+1}. ${q.q}</div>
     ${q.img && IMG[q.img] ? `<img class="qimg" src="${IMG[q.img]}" alt="참고 그림">` : ''}
+    ${ox2StageTag}
     <div id="choicesWrap">${choicesHtml}</div>
     ${feedback}
     ${state.submitted?
@@ -896,6 +1015,14 @@ function autoSubmitTimeout(){ if(!state.submitted){handleSubmit(true);} }
 function handleSubmit(timeout){
   clearInterval(state.timerId);
   const q=currentQ();
+  if(q.t==='ox2' && state.ox2Stage===1 && !(timeout && state.selected==null)){
+    const pick=state.selected===0?'O':'X';
+    if(!q.isTrue && pick==='X'){
+      state.ox2Stage=2; state.selected=null;
+      render();
+      return;
+    }
+  }
   let ok=false;
   let yourAnswerText='(제출 안함)';
   let correctAnswerText;
@@ -904,6 +1031,31 @@ function handleSubmit(timeout){
     ok = !timeout && typed===q.answer;
     yourAnswerText = typed || '(제출 안함)';
     correctAnswerText = q.answer;
+  } else if(q.t==='ox2'){
+    const correctFirstText = q.isTrue ? '⭕ 맞는 문장' : ('❌ 틀린 문장 · '+q.reasons[q.ra]);
+    if(state.ox2Stage===1){
+      if(timeout && state.selected==null){
+        ok=false; yourAnswerText='(제출 안함)';
+      } else {
+        const pick=state.selected===0?'O':'X';
+        if(q.isTrue){
+          ok = pick==='O';
+          yourAnswerText = pick==='O' ? '⭕ 맞는 문장' : '❌ 틀린 문장';
+        } else {
+          ok=false;
+          yourAnswerText='⭕ 맞는 문장';
+        }
+      }
+      correctAnswerText = correctFirstText;
+    } else {
+      if(timeout && state.selected==null){
+        ok=false; yourAnswerText='(이유 선택 안함)';
+      } else {
+        ok = state.selected===q.ra;
+        yourAnswerText = state.selected!=null ? ('❌ 틀린 문장 · '+q.reasons[state.selected]) : '(이유 선택 안함)';
+      }
+      correctAnswerText = correctFirstText;
+    }
   } else {
     if(timeout && state.selected==null){ ok=false; }
     else { ok=state.selected===q.a; }
@@ -929,7 +1081,7 @@ function handleSubmit(timeout){
 
 function goNext(){
   state.idx++;
-  state.selected=null;state.blockPicks=[];state.submitted=false;
+  state.selected=null;state.blockPicks=[];state.submitted=false;state.ox2Stage=1;
   if(state.idx>=state.list.length){ finishQuiz(); return; }
   if(state.mode==='focus' && state.idx>0 && state.idx%state.setSize===0){
     screen='setresult';render();return;
